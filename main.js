@@ -29,35 +29,39 @@ app.use(express.static(path.join(__dirname, "public"))); //To serve static files
 app.use(express.static(path.join(__dirname, "dist")));
 //remote:
 // app.use(express.static(path.join(__dirname, '../assignment-3-3-basic/dist')));
-app.get("/",function(req,res)
-{ 
+app.get("/", function (req, res) {
   //remote: 
   // res.sendFile(path.join(__dirname, '../assignment-3-3-basic/dist/index.html'));
   //local:
-  res.sendFile(__dirname+"/index.html");
+  res.sendFile(__dirname + "/index.html");
 
 });
 
-// app.use(cors());
-// app.options("*", cors());
+
 
 const corsConfig = {
   origin: true,
   credentials: true
 };
 
+// app.use(cors());
+// app.options("*", cors());
+
 app.use(cors(corsConfig));
 app.options("*", cors(corsConfig));
 
-var port = process.env.PORT || "80"; //local=3000 remote=80
-//#endregion
-const user = require("./routes/user");
-const recipes = require("./routes/recipes");
-const auth = require("./routes/auth");
+// var port = process.env.PORT || "80"; //local=3000 remote=80
+// //#endregion
+// const user = require("./routes/user");
+// const recipes = require("./routes/recipes");
+// const auth = require("./routes/auth");
 
 
 //#region cookie middleware
 app.use(function (req, res, next) {
+  // console.log(Middleware triggered for ${req.method} ${req.url});
+  console.log('Session:', req.session);
+
   if (req.session && req.session.user_id) {
     DButils.execQuery("SELECT user_id FROM users")
       .then((users) => {
@@ -73,13 +77,20 @@ app.use(function (req, res, next) {
 });
 //#endregion
 
+var port = process.env.PORT || "3000"; //local=3000 remote=80
+//#endregion
+const user = require("./routes/user");
+const recipes = require("./routes/recipes");
+const auth = require("./routes/auth");
+
 // ----> For cheking that our server is alive
 app.get("/alive", (req, res) => res.send("I'm alive"));
 
 // Routings
 app.use("/users", user);
 app.use("/recipes", recipes);
-app.use(auth);
+// app.use(auth);
+app.use("/auth", auth);  // This was missing
 
 // Default router
 app.use(function (err, req, res, next) {
@@ -99,3 +110,5 @@ process.on("SIGINT", function () {
   }
   process.exit();
 });
+
+module.exports = app;

@@ -1,20 +1,22 @@
-var mysql = require('mysql');
+var mysql = require('mysql2');
 require("dotenv").config();
 
 
 const config={
 connectionLimit:4,
-  host: process.env.host,//"localhost"
-  user: process.env.user,//"root"
-  password: "pass_root@123",
-  database:"mydb"
+host: process.env.DB_HOST || 'localhost',
+user: process.env.DB_USER || 'root',
+password: process.env.DB_PASSWORD || 'tomer123',
+database: process.env.DB_NAME || 'mydb'
 }
 const pool = new mysql.createPool(config);
 
 const connection =  () => {
   return new Promise((resolve, reject) => {
   pool.getConnection((err, connection) => {
-    if (err) reject(err);
+    if (err){        
+      // console.error('Error connecting to MySQL:', err);
+    } reject(err);
     console.log("MySQL pool connected: threadId " + connection.threadId);
     const query = (sql, binding) => {
       return new Promise((resolve, reject) => {
@@ -25,12 +27,12 @@ const connection =  () => {
          });
        };
        const release = () => {
-         return new Promise((resolve, reject) => {
-           if (err) reject(err);
+        return new Promise((resolve, reject) => {
+          if (err) reject(err);
            console.log("MySQL pool released: threadId " + connection.threadId);
            resolve(connection.release());
-         });
-       };
+        });
+      };
        resolve({ query, release });
      });
    });

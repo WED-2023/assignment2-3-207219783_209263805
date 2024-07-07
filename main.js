@@ -59,7 +59,7 @@ app.options("*", cors(corsConfig));
 
 //#region cookie middleware
 app.use(function (req, res, next) {
-  // console.log(Middleware triggered for ${req.method} ${req.url});
+  console.log(`Middleware triggered for ${req.method} ${req.url}`);
   console.log('Session:', req.session);
 
   if (req.session && req.session.user_id) {
@@ -110,5 +110,3 @@ process.on("SIGINT", function () {
   }
   process.exit();
 });
-
-module.exports = app;

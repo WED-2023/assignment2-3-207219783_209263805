@@ -29,14 +29,11 @@ router.post("/Register", async (req, res, next) => {
       user_details.password,
       parseInt(process.env.bcrypt_saltRounds)
     );
-    console.log("a");
     await DButils.execQuery(
-      `INSERT INTO users (username, firstname, lastname, country, password, email) VALUES 
-      ('${user_details.username}', '${user_details.firstname}', '${user_details.lastname}', 
+      `INSERT INTO users VALUES ('${user_details.username}', '${user_details.firstname}', '${user_details.lastname}',
       '${user_details.country}', '${hash_password}', '${user_details.email}')`
     );
     res.status(201).send({ message: "user created", success: true });
-    console.log("a");
   } catch (error) {
     next(error);
   }

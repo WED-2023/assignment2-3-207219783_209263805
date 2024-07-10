@@ -17,8 +17,9 @@ app.use(
     secret: "template", // the encryption key
     duration: 24 * 60 * 60 * 1000, // expired after 20 sec
     activeDuration: 1000 * 60 * 5, // if expiresIn < activeDuration,
-    cookie: {
+    cookie:{ 
       httpOnly: false,
+      // { secure: false },
     }
     //the session will be extended by activeDuration milliseconds
   })

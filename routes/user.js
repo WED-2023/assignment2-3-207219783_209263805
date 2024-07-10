@@ -8,13 +8,39 @@ const recipe_utils = require("./utils/recipes_utils");
  * Authenticate all incoming requests by middleware
  */
 router.use(async function (req, res, next) {
+  // console.log("aaaa")
+  // console.log(req.user_id)
+  // console.log(req.session.user_id)
+  // if (req.session && req.session.user_id) {
+  //   console.log("aaaa2")
+  //   DButils.execQuery("SELECT user_id FROM users").then((users) => {
+      
+  //     if (users.find((x) => x.user_id === req.session.user_id)) {
+  //       console.log(`${req.user_id} = ${req.session.user_id}`)
+  //       req.user_id = req.session.user_id;
+  //       next();
+  //     }
+  //   }).catch(err => next(err));
+  // } else {
+  //   res.sendStatus(401);
+  // }
   if (req.session && req.session.user_id) {
-    DButils.execQuery("SELECT user_id FROM users").then((users) => {
+    console.log("aaaa")
+  console.log(req.user_id)
+  console.log(req.session.user_id)
+    try {
+      const users = await DButils.execQuery("SELECT user_id FROM users");
+      console.log(users.user_id)
       if (users.find((x) => x.user_id === req.session.user_id)) {
+        console.log(`${req.session.user_id} is authenticated`);
         req.user_id = req.session.user_id;
         next();
+      } else {
+        res.sendStatus(401);
       }
-    }).catch(err => next(err));
+    } catch (err) {
+      next(err);
+    }
   } else {
     res.sendStatus(401);
   }
@@ -25,6 +51,8 @@ router.use(async function (req, res, next) {
  * This path gets body with recipeId and save this recipe in the favorites list of the logged-in user
  */
 router.post('/favorites', async (req,res,next) => {
+  console.log("fav")
+
   try{
     const user_id = req.session.user_id;
     const recipe_id = req.body.recipeId;

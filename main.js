@@ -86,36 +86,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Middleware to check session and user authentication
-// app.use(function (req, res, next) {
-//   console.log(`Middleware triggered for ${req.method} ${req.url}`);
-//   console.log('Session:', req.session);
-
-//   if (req.session && req.session.user_id) {
-//     DButils.execQuery("SELECT user_id FROM users WHERE user_id = ?", [req.session.user_id])
-//       .then((users) => {
-//         if (users.length > 0) {
-//           req.user_id = req.session.user_id;
-//           console.log('User authenticated:', req.user_id); // Debugging
-//         } else {
-//           console.log('User not found in the database');
-//         }
-//         next();
-//       })
-//       .catch((error) => {
-//         console.error('Database query error:', error);
-//         next(error);
-//       });
-//   } else {
-//     next();
-//   }
-// });
-
-// var port = process.env.PORT || "80"; //local=3000 remote=80
-// //#endregion
-// const user = require("./routes/user");
-// const recipes = require("./routes/recipes");
-// const auth = require("./routes/auth");
 
 
 //#region cookie middleware

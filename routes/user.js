@@ -30,27 +30,6 @@ router.use(async function (req, res, next) {
   }
 });
 
-// router.use(async function (req, res, next) {
-//   console.log(`Middleware triggered for ${req.method} ${req.url}`);
-//   console.log('Session:', req.session);
-  
-//   if (req.session && req.session.user_id) {
-//     try {
-//       const users = await DButils.execQuery("SELECT user_id FROM users WHERE user_id = ?", [req.session.user_id]);
-//       if (users.length > 0) {
-//         req.user_id = req.session.user_id;
-//         next();
-//       } else {
-//         res.sendStatus(401);
-//       }
-//     } catch (err) {
-//       next(err);
-//     }
-//   } else {
-//     res.sendStatus(401);
-//   }
-// });
-
 /**
  * This path gets body with recipeId and save this recipe in the favorites list of the logged-in user
  */
@@ -70,7 +49,7 @@ router.post('/favorites', async (req,res,next) => {
  */
 router.get('/favorites', async (req,res,next) => {
   try{
-    const user_id = req.session.user_id;
+    const user_id = req.session.user.user_id;
     let favorite_recipes = {};
     const recipes_id = await user_utils.getFavoriteRecipes(user_id);
     let recipes_id_array = [];

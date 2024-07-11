@@ -68,6 +68,40 @@ router.get('/favorites', async (req,res,next) => {
 });
 
 
+/**
+ * This path is for creating a new recipe 
+ * Create a new Recipe
+ */
+// TODO: Maybe do delete the Serving count !!!
+router.post("/myRecipes", async (req, res, next) => {
+  try {
+    const user_id = req.session.user_id;
+    const result = await DButils.execQuery(`SELECT COUNT(*) AS record_count FROM recipes`);
+    console.log(result[0].record_count);
+    const id = result[0].record_count + 1;
+    const recipe_id = 'MR' + id; // Generates a unique recipe_id like 'MR101' if there are 100 recipes
+    console.log(recipe_id);
+
+    let { title, image, readyInMinutes , vegetarian, vegan , glutenFree, ingredients, instructions, servings} = req.body;
+    let ingredientsJSON = JSON.stringify(ingredients);
+
+    // Convert boolean values to integers
+    vegetarian = vegetarian ? 1 : 0;
+    vegan = vegan ? 1 : 0;
+    glutenFree = glutenFree ? 1 : 0;
+
+    let query = `INSERT INTO Recipes VALUES ('${user_id}','${recipe_id}','${title}','${image}','${readyInMinutes}','${vegetarian}','${vegan}', '${glutenFree}','${ingredientsJSON}','${instructions}','${servings}')`;
+    await DButils.execQuery(query);
+    res.status(201).send("A new recipe has been added");
+
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+
+
 
 
 

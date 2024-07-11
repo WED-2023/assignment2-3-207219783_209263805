@@ -7,7 +7,7 @@ const config = {
   host: process.env.DB_HOST || "localhost", // Ensure the environment variable is set correctly
   user: process.env.DB_USER || "root", // Ensure the environment variable is set correctly
   password: process.env.DB_PASSWORD || "tomer123", // Ensure the environment variable is set correctly
-  database: process.env.DB_NAME || "mydb" // Ensure the environment variable is set correctly
+  database: process.env.DB_NAME || "db" // Ensure the environment variable is set correctly
 }
 const pool = new mysql.createPool(config);
 
@@ -28,6 +28,7 @@ const connection = () => {
               console.error('Error executing query:', err);
               return reject(err);
             }
+
             resolve(result);
           });
         });

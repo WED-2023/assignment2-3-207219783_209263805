@@ -3,26 +3,18 @@ require("dotenv").config();
 var express = require("express");
 var path = require("path");
 var logger = require("morgan");
-const session = require("client-sessions");
-const DButils = require("./routes/utils/DButils");
-var cors = require('cors')
+// const session = require("client-sessions");
 
-var app = express();
+const session = require('express-session');
+const store = new session.MemoryStore();
+
+const DButils = require("./routes/utils/DButils");
+const cors = require('cors')
+
+const  app = express();
 app.use(logger("dev")); //logger
 app.use(express.json()); // parse application/json
-app.use(
-  session({
-    cookieName: "session", // the cookie key name
-    //secret: process.env.COOKIE_SECRET, // the encryption key
-    secret: "template", // the encryption key
-    duration: 24 * 60 * 60 * 1000, // expired after 20 sec
-    activeDuration: 1000 * 60 * 5, // if expiresIn < activeDuration,
-    cookie: {
-      httpOnly: false,
-    }
-    //the session will be extended by activeDuration milliseconds
-  })
-);
+
 app.use(express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(express.static(path.join(__dirname, "public"))); //To serve static files such as images, CSS files, and JavaScript files
 //local:
@@ -37,18 +29,87 @@ app.get("/", function (req, res) {
 
 });
 
-
-
+// const corsConfig = {
+//   origin: true,
+//   credentials: true
+// };
 const corsConfig = {
-  origin: true,
+  origin: 'http://localhost:8080',
   credentials: true
 };
+app.use(cors({
+  origin: 'http://localhost:8080',
+  credentials: true
+}));
 
 // app.use(cors());
 // app.options("*", cors());
 
 app.use(cors(corsConfig));
 app.options("*", cors(corsConfig));
+
+// // client session
+// app.use(
+//   session({
+//     cookieName: "session", // the cookie key name
+//     //secret: process.env.COOKIE_SECRET, // the encryption key
+//     secret: "template", // the encryption key
+//     duration: 24 * 60 * 60 * 1000, // expired after 20 sec
+//     activeDuration: 1000 * 60 * 5, // if expiresIn < activeDuration,
+//     cookie: {
+//       httpOnly: true,
+//       secure: false, // set this to true if using HTTPS
+
+//     }
+//   })
+// );
+
+// Express Session configuration
+app.use(
+  session({
+    // name: "session", // the cookie key name
+    secret: process.env.COOKIE_SECRET || "template", // the encryption key
+    resave: false,
+    saveUninitialized: false, // Dont init cookie befoe the user logged in
+    store,
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      httpOnly: true,
+      secure: false, // set this to true if using HTTPS
+    },
+  })
+);
+
+app.use((req, res, next) => {
+  // console.log(store);
+  console.log('Session middleware:', req.session);
+  next();
+});
+
+// Middleware to check session and user authentication
+// app.use(function (req, res, next) {
+//   console.log(`Middleware triggered for ${req.method} ${req.url}`);
+//   console.log('Session:', req.session);
+
+//   if (req.session && req.session.user_id) {
+//     DButils.execQuery("SELECT user_id FROM users WHERE user_id = ?", [req.session.user_id])
+//       .then((users) => {
+//         if (users.length > 0) {
+//           req.user_id = req.session.user_id;
+//           console.log('User authenticated:', req.user_id); // Debugging
+//         } else {
+//           console.log('User not found in the database');
+//         }
+//         next();
+//       })
+//       .catch((error) => {
+//         console.error('Database query error:', error);
+//         next(error);
+//       });
+//   } else {
+//     next();
+//   }
+// });
 
 // var port = process.env.PORT || "80"; //local=3000 remote=80
 // //#endregion

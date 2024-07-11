@@ -79,23 +79,32 @@ async function getRandomRecipes() {
   }
 }
 
-async function searchRecipe(recipeName, cuisine, diet, intolerance, number, username) {
-  const response = await axios.get(`${api_domain}/complexSearch`, {
+async function searchRecipe(recipeName, cuisine, diet, intolerance, number) {
+  try{
+    const response = await axios.get(`${api_domain}/complexSearch`, {
       params: {
           query: recipeName,
           cuisine: cuisine,
           diet: diet,
           intolerances: intolerance,
           number: number,
-          apiKey: process.env.spooncular_apiKey
-      }
+          apiKey: process.env.SPOONACULAR_API_KEY
+        }
   });
-
-  return getRecipesPreview(response.data.results.map((element) => element.id), username);
+  console.log(AAAAAAAAAAAAAAAAAA);
+  const recipeIds = response.data.results.map(element => element.id);
+  console.log(`User ${username} searched for recipes with query: ${recipeName}`);
+  console.log(BBBBBBBBBB);
+  return getRecipesDetails(recipeIds);
+  } catch (error) {
+    throw error;
+  }
+  // return getRecipesPreview(response.data.results.map((element) => element.id), username);
 }
 
 
 exports.getRecipesDetails = getRecipesDetails;
 exports.getRandomRecipes = getRandomRecipes;
+exports.searchRecipe = searchRecipe;
 
 

@@ -15,7 +15,12 @@ router.get("/search", async (req, res, next) => {
     const intolerance = req.query.intolerance;
     const number = req.query.number || 5;
     const results = await recipes_utils.searchRecipe(recipeName, cuisine, diet, intolerance, number);
-    res.status(200).send(results);
+    if (results.length === 0){
+      throw { status: 404, message: "no results were found" };
+    }
+    else{
+      res.status(200).send(results);
+    }  
   } catch (error) {
     next(error);
   }

@@ -10,33 +10,50 @@ require('dotenv').config();
 
 
 async function getRecipeInformation(recipe_id) {
-    return await axios.get(`${api_domain}/${recipe_id}/information`, {
+    try {
+      const response = await axios.get(`${api_domain}/${recipe_id}/information`, {
         params: {
-            includeNutrition: false,
-            apiKey: process.env.spooncular_apiKey
+          includeNutrition: false,
+          apiKey: process.env.SPOONACULAR_API_KEY
         }
-    });
-}
-
-
-
-async function getRecipeDetails(recipe_id) {
-    let recipe_info = await getRecipeInformation(recipe_id);
-    let { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree } = recipe_info.data;
-
-    return {
-        id: id,
-        title: title,
-        readyInMinutes: readyInMinutes,
-        image: image,
-        popularity: aggregateLikes,
-        vegan: vegan,
-        vegetarian: vegetarian,
-        glutenFree: glutenFree,
-        
+      });
+      console.log(`Received data for recipe ID ${recipe_id}:`, response.data);
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        console.error(`No results found for recipe ID: ${recipe_id}`);
+        throw { status: 404, message: "No results were found" };
+      } else {
+        console.error(`Error fetching recipe information for ID ${recipe_id}:`, error);
+        throw error;
+      }
     }
-}
+  }
 
+
+
+async function getRecipeDetails(recipe_ids) {
+    try {
+      const recipeDetailsPromises = recipe_ids.map(id => getRecipeInformation(id));
+      const recipes = await Promise.all(recipeDetailsPromises);
+      return recipes.map(recipe_info => {
+        const { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree } = recipe_info;
+        return {
+          id,
+          title,
+          readyInMinutes,
+          image,
+          popularity: aggregateLikes,
+          vegan,
+          vegetarian,
+          glutenFree
+        };
+      });
+    } catch (error) {
+      console.error(`Error fetching recipe details:`, error);
+      throw error;
+    }
+  }
 async function searchRecipe(recipeName, cuisine, diet, intolerance, number, username) {
     const response = await axios.get(`${api_domain}/complexSearch`, {
         params: {

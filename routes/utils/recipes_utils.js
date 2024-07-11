@@ -107,5 +107,6 @@ async function searchRecipe(recipeName, cuisine, diet, intolerance, number) {
 exports.getRecipesDetails = getRecipesDetails;
 exports.getRandomRecipes = getRandomRecipes;
 exports.searchRecipe = searchRecipe;
+exports.getRecipeInformation = getRecipeInformation;
 
 

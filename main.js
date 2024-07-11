@@ -111,11 +111,14 @@ app.use((req, res, next) => {
 //   }
 // });
 
-// var port = process.env.PORT || "80"; //local=3000 remote=80
-// //#endregion
-// const user = require("./routes/user");
-// const recipes = require("./routes/recipes");
-// const auth = require("./routes/auth");
+
+
+
+var port = process.env.PORT || "3000"; //local=3000 remote=80
+//#endregion
+const user = require("./routes/user");
+const recipes = require("./routes/recipes");
+const auth = require("./routes/auth");
 
 
 //#region cookie middleware
@@ -136,13 +139,6 @@ app.use(function (req, res, next) {
     next();
   }
 });
-//#endregion
-
-var port = process.env.PORT || "3000"; //local=3000 remote=80
-//#endregion
-const user = require("./routes/user");
-const recipes = require("./routes/recipes");
-const auth = require("./routes/auth");
 
 // ----> For cheking that our server is alive
 app.get("/alive", (req, res) => res.send("I'm alive"));
@@ -150,8 +146,7 @@ app.get("/alive", (req, res) => res.send("I'm alive"));
 // Routings
 app.use("/users", user);
 app.use("/recipes", recipes);
-// app.use(auth);
-app.use("/auth", auth);  // This was missing
+app.use("/auth", auth);  
 
 // Default router
 app.use(function (err, req, res, next) {

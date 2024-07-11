@@ -18,7 +18,12 @@ router.get("/search", async (req, res, next) => {
     const intolerance = req.query.intolerance;
     const number = req.query.number || 5;
     const results = await recipes_utils.searchRecipe(recipeName, cuisine, diet, intolerance, number);
-    res.send(results);
+    if (results.length === 0){
+      throw { status: 404, message: "no results were found" };
+    }
+    else{
+      res.status(200).send(results);
+    }  
   } catch (error) {
     next(error);
   }
@@ -50,12 +55,24 @@ router.get('/last-viewed', async (req, res, next) => {
   }
 });
 /**
+ * This path returns random recipes
+ */
+router.get("/random", async (req, res, next) => {
+  try{
+    const randomRecipes = await recipes_utils.getRandomRecipes();
+    res.status(200).send(randomRecipes);
+  } catch (error) {
+    console.error('Error fetching random recipes:', error);
+    next(error);
+  }
+});
+/**
  * This path returns a full details of a recipe by its id
  */
-router.get("/:recipeId", async (req, res, next) => {
+router.get("/recipeId/:recipeId", async (req, res, next) => {
   try {
-    const recipe = await recipes_utils.getRecipeDetails(req.params.recipeId);
-    res.send(recipe);
+    const recipe = await recipes_utils.getRecipesDetails([req.params.recipeId]);
+    res.status(200).send(recipe);
   } catch (error) {
     next(error);
   }

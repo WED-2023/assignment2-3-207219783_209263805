@@ -30,9 +30,7 @@ async function getRecipeInformation(recipe_id) {
     }
   }
 
-
-
-async function getRecipeDetails(recipe_ids) {
+async function getRecipesDetails(recipe_ids) {
     try {
       const recipeDetailsPromises = recipe_ids.map(id => getRecipeInformation(id));
       const recipes = await Promise.all(recipeDetailsPromises);
@@ -71,7 +69,7 @@ async function searchRecipe(recipeName, cuisine, diet, intolerance, number, user
 
 
 
-exports.getRecipeDetails = getRecipeDetails;
+exports.getRecipesDetails = getRecipesDetails;
 
 
 

@@ -55,7 +55,7 @@ router.get('/favorites', async (req,res,next) => {
     }
     
     let recipes_id_array = recipes_id.map((element) => element.recipe_id); // Extracting the recipe IDs into an array
-    const results = await recipe_utils.getRecipeDetails(recipes_id_array);
+    const results = await recipe_utils.getRecipesDetails(recipes_id_array);
     if(results.length == 0){
       throw { status: 404, message: "no results were found" };
     }
@@ -99,6 +99,28 @@ router.post("/myRecipes", async (req, res, next) => {
   }
 });
 
+/**
+ * This path is for get all recipe s
+ * Get Recipes for the user
+ */
+router.get("/myRecipes", async (req, res, next) => {
+  try {
+    const user_id = req.session.user_id;
+    if (!user_id) {
+      return res.status(401).send({ message: "User not authenticated" });
+    }
+    
+    const myRecipes = await user_utils.getMyRecipes(user_id);
+    if (myRecipes.length === 0) {
+      return res.status(404).send({ message: "No recipes found for this user" });
+    }
+
+    res.status(200).send(myRecipes);
+  } catch (error) {
+    console.error('Error fetching user recipes:', error);
+    next(error);
+  }
+});
 
 
 

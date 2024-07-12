@@ -30,16 +30,16 @@ router.get("/search", async (req, res, next) => {
 });
 
 // Route to fetch random recipes
-router.get('/random', async (req, res, next) => {
-  try {
-    const ap = "286e5a606e124fbe8cf4e627c135ab92";
-    const amountToFetch = 3;
-    const response = await axios.get(`https://api.spoonacular.com/recipes/random?number=${amountToFetch}&apiKey=${ap}`);
-    res.status(200).send(response.data);
-  } catch (error) {
-    next(error);
-  }
-});
+// router.get('/random', async (req, res, next) => {
+//   try {
+//     const ap = "286e5a606e124fbe8cf4e627c135ab92";
+//     const amountToFetch = 3;
+//     const response = await axios.get(`https://api.spoonacular.com/recipes/random?number=${amountToFetch}&apiKey=${ap}`);
+//     res.status(200).send(response.data);
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 // Route to fetch last viewed recipes
 router.get('/last-viewed', async (req, res, next) => {

@@ -17,7 +17,7 @@ async function getRecipeInformation(recipe_id) {
           apiKey: process.env.SPOONACULAR_API_KEY
         }
       });
-      console.log(`Received data for recipe ID ${recipe_id}:`, response.data);
+      //console.log(`Received data for recipe ID ${recipe_id}:`, response.data);
       return response.data;
     } catch (error) {
       if (error.response && error.response.status === 404) {

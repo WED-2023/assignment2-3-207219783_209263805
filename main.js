@@ -82,7 +82,7 @@ app.use(
 
 app.use((req, res, next) => {
   // console.log(store);
-  console.log('Session middleware:', req.session);
+  // console.log('Session middleware:', req.session);
   next();
 });
 
@@ -96,8 +96,8 @@ const auth = require("./routes/auth");
 
 //#region cookie middleware
 app.use(function (req, res, next) {
-  console.log(`Middleware triggered for ${req.method} ${req.url}`);
-  console.log('Session:', req.session);
+  //console.log(`Middleware triggered for ${req.method} ${req.url}`);
+  //console.log('Session:', req.session);
 
   if (req.session && req.session.user_id) {
     DButils.execQuery("SELECT user_id FROM users")

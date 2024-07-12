@@ -10,26 +10,42 @@ router.get("/", (req, res) => res.send("im here"));
 /**
  * This path is for searching a recipe
  */
+// router.get("/search", async (req, res, next) => {
+//   try {
+//     const recipeName = req.query.recipeName;
+//     const cuisine = req.query.cuisine;
+//     const diet = req.query.diet;
+//     const intolerance = req.query.intolerance;
+//     const number = req.query.number || 5;
+//     const results = await recipes_utils.searchRecipe(recipeName, cuisine, diet, intolerance, number);
+//     if (results.length === 0){
+//       throw { status: 404, message: "no results were found" };
+//     }
+//     else{
+//       res.status(200).send(results);
+//     }  
+//   } catch (error) {
+//     next(error);
+//   }
+// });
+
+// Server-side endpoint to handle recipe search
 router.get("/search", async (req, res, next) => {
+  const { query, number } = req.query;
+  const apiKey = process.env.SPOONACULAR_API_KEY || "b60349e37e994bfb83b9eb950173506e"; // Make sure your API key is stored in environment variables
+  const url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${apiKey}&query=${query}&number=${number}&addRecipeInformation=true`;
+
   try {
-    const recipeName = req.query.recipeName;
-    const cuisine = req.query.cuisine;
-    const diet = req.query.diet;
-    const intolerance = req.query.intolerance;
-    const number = req.query.number || 5;
-    const results = await recipes_utils.searchRecipe(recipeName, cuisine, diet, intolerance, number);
-    if (results.length === 0){
-      throw { status: 404, message: "no results were found" };
-    }
-    else{
-      res.status(200).send(results);
-    }  
+    const response = await axios.get(url);
+    res.status(200).send(response.data);
   } catch (error) {
-    next(error);
+    console.error('Error fetching recipes from Spoonacular:', error);
+    res.status(500).send({ message: "Failed to fetch recipes" });
   }
 });
 
-// Route to fetch random recipes
+
+// // Route to fetch random recipes
 // router.get('/random', async (req, res, next) => {
 //   try {
 //     const ap = "286e5a606e124fbe8cf4e627c135ab92";
@@ -60,6 +76,8 @@ router.get('/last-viewed', async (req, res, next) => {
 router.get("/random", async (req, res, next) => {
   try{
     const randomRecipes = await recipes_utils.getRandomRecipes();
+    console.log(randomRecipes);
+
     res.status(200).send(randomRecipes);
   } catch (error) {
     console.error('Error fetching random recipes:', error);
@@ -71,7 +89,9 @@ router.get("/random", async (req, res, next) => {
  */
 router.get("/recipeId/:recipeId", async (req, res, next) => {
   try {
-    const recipe = await recipes_utils.getRecipesDetails([req.params.recipeId]);
+    // const recipe = await recipes_utils.getRecipesDetails([req.params.recipeId]);
+    const recipe = await recipes_utils.getRecipeInformation(req.params.recipeId);
+    console.log(recipe);
     res.status(200).send(recipe);
   } catch (error) {
     next(error);

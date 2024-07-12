@@ -14,7 +14,7 @@ async function getRecipeInformation(recipe_id) {
       const response = await axios.get(`${api_domain}/${recipe_id}/information`, {
         params: {
           includeNutrition: false,
-          apiKey: process.env.SPOONACULAR_API_KEY
+          apiKey: process.env.SPOONACULAR_API_KEY || "b60349e37e994bfb83b9eb950173506e"
         }
       });
       //console.log(`Received data for recipe ID ${recipe_id}:`, response.data);
@@ -56,10 +56,11 @@ async function getRandomRecipes() {
     const response = await axios.get(`${api_domain}/random`, {
       params: {
         number: 3,  // count of random recipes
-        apiKey: process.env.SPOONACULAR_API_KEY
+        apiKey: process.env.SPOONACULAR_API_KEY || "286e5a606e124fbe8cf4e627c135ab92"
       }
     });
     const recipes = response.data.recipes;
+    console.log(recipes);
     return recipes.map(recipe_info => {
       const { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree } = recipe_info;
       return {
@@ -88,7 +89,7 @@ async function searchRecipe(recipeName, cuisine, diet, intolerance, number) {
           diet: diet,
           intolerances: intolerance,
           number: number,
-          apiKey: process.env.SPOONACULAR_API_KEY
+          apiKey: process.env.SPOONACULAR_API_KEY || "286e5a606e124fbe8cf4e627c135ab92"
         }
   });
   console.log(AAAAAAAAAAAAAAAAAA);
@@ -106,5 +107,6 @@ async function searchRecipe(recipeName, cuisine, diet, intolerance, number) {
 exports.getRecipesDetails = getRecipesDetails;
 exports.getRandomRecipes = getRandomRecipes;
 exports.searchRecipe = searchRecipe;
+exports.getRecipeInformation = getRecipeInformation;
 
 

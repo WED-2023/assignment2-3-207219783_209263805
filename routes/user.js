@@ -8,12 +8,14 @@ const recipe_utils = require("./utils/recipes_utils");
  * Authenticate all incoming requests by middleware
  */
 router.use(async function (req, res, next) {
-  console.log(`Middleware triggered for ${req.method} ${req.url}`);
-  console.log('Session:', req.session);
-  console.log('User username:', req.session.user.username);
+  // console.log(`Middleware triggered for ${req.method} ${req.url}`);
+  // console.log('Session:', req.session);
+  // console.log('User username:', req.session.user.username);
   
   if (req.session && req.session.user) { // Ensure session contains user information
+    // console.log("aaaaa");
     const { username } = req.session.user;
+    // console.log(username);
     try {
       const users = await DButils.execQuery(`SELECT username FROM users WHERE username = '${username}'`);
       if (users.length > 0) {
@@ -46,14 +48,43 @@ router.post('/favorites', async (req,res,next) => {
 })
 
 /**
+ * This route removes a recipe from the favorites list of the logged-in user
+ * Remove from favorites
+ */
+router.delete('/favorites', async (req, res, next) => {
+  try {
+    const user_id = req.session.user.user_id;
+    const recipe_id = req.body.recipeId;
+
+    // Check if the recipe exists in the user's favorites
+    const favorites = await user_utils.getFavoriteRecipes(user_id);
+    const favoriteExists = favorites.some(fav => fav.recipe_id === recipe_id);
+
+    if (!favoriteExists) {
+      return res.status(404).send("Recipe not found in favorites");
+    }
+
+    // Remove the recipe from favorites
+    await user_utils.removeFavorite(user_id, recipe_id);
+    res.status(200).send("Recipe successfully removed from favorites");
+  } catch (error) {
+    console.error(`Error removing recipe from favorites:`, error);
+    next(error);
+  }
+});
+
+
+/**
  * This path returns the favorites recipes that were saved by the logged-in user
  * Get all Favorites
  */
 router.get('/favorites', async (req,res,next) => {
   try{
     const user_id = req.session.user.user_id;
-    let favorite_recipes = {};
+    console.log(user_id);
+    // let favorite_recipes = {};
     const recipes_id = await user_utils.getFavoriteRecipes(user_id);
+    // console.log(recipes_id);
     if (recipes_id.length === 0) {
       return res.status(404).send({ message: "No favorite recipes found" });
     }
@@ -79,12 +110,12 @@ router.get('/favorites', async (req,res,next) => {
 // TODO: Maybe do delete the Serving count !!!
 router.post("/myRecipes", async (req, res, next) => {
   try {
-    const user_id = req.session.user_id;
+    const user_id = req.session.user.user_id;
     const result = await DButils.execQuery(`SELECT COUNT(*) AS record_count FROM recipes`);
-    console.log(result[0].record_count);
+    //console.log(result[0].record_count);
     const id = result[0].record_count + 1;
     const recipe_id = 'MR' + id; // Generates a unique recipe_id like 'MR101' if there are 100 recipes
-    console.log(recipe_id);
+    //console.log(recipe_id);
 
     let { title, image, readyInMinutes , vegetarian, vegan , glutenFree, ingredients, instructions, servings} = req.body;
     let ingredientsJSON = JSON.stringify(ingredients);
@@ -109,7 +140,8 @@ router.post("/myRecipes", async (req, res, next) => {
  */
 router.get("/myRecipes", async (req, res, next) => {
   try {
-    const user_id = req.session.user_id;
+    const user_id = req.session.user.user_id;
+    console.log(user_id);
     if (!user_id) {
       return res.status(401).send({ message: "User not authenticated" });
     }

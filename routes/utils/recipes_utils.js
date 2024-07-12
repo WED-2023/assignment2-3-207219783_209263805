@@ -14,10 +14,10 @@ async function getRecipeInformation(recipe_id) {
       const response = await axios.get(`${api_domain}/${recipe_id}/information`, {
         params: {
           includeNutrition: false,
-          apiKey: process.env.SPOONACULAR_API_KEY || "286e5a606e124fbe8cf4e627c135ab92"
+          apiKey: process.env.SPOONACULAR_API_KEY || "b60349e37e994bfb83b9eb950173506e"
         }
       });
-      console.log(`Received data for recipe ID ${recipe_id}:`, response.data);
+      //console.log(`Received data for recipe ID ${recipe_id}:`, response.data);
       return response.data;
     } catch (error) {
       if (error.response && error.response.status === 404) {

@@ -32,7 +32,7 @@ router.get("/", (req, res) => res.send("im here"));
 // Server-side endpoint to handle recipe search
 router.get("/search", async (req, res, next) => {
   const { query, number } = req.query;
-  const apiKey = process.env.SPOONACULAR_API_KEY || "286e5a606e124fbe8cf4e627c135ab92"; // Make sure your API key is stored in environment variables
+  const apiKey = process.env.SPOONACULAR_API_KEY || "b60349e37e994bfb83b9eb950173506e"; // Make sure your API key is stored in environment variables
   const url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${apiKey}&query=${query}&number=${number}&addRecipeInformation=true`;
 
   try {

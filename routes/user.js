@@ -84,7 +84,7 @@ router.get('/favorites', async (req,res,next) => {
     console.log(user_id);
     // let favorite_recipes = {};
     const recipes_id = await user_utils.getFavoriteRecipes(user_id);
-    console.log(recipes_id);
+    // console.log(recipes_id);
     if (recipes_id.length === 0) {
       return res.status(404).send({ message: "No favorite recipes found" });
     }

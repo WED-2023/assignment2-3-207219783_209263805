@@ -91,20 +91,4 @@ router.get("/recipeId/:recipeId", async (req, res, next) => {
   }
 });
 
-router.get("/MyRecipe/:recipeId", async (req, res, next) => {
-  try {
-    const { recipeId } = req.params;
-    console.log("Fetching recipe with ID:", recipeId);  // Debugging log
-    
-    if (!recipeId || recipeId === 'undefined') {
-      return res.status(400).send({ message: "Invalid recipe ID: recipeId is undefined" });
-    }
-    const recipe = await recipes_utils.getMyRecipeInformation(req.params.recipeId);
-    // console.log(recipe);
-    res.status(200).send(recipe);
-  } catch (error) {
-    next(error);
-  }
-});
-
 module.exports = router;

@@ -1,4 +1,5 @@
 const axios = require("axios");
+const DButils = require('./DButils');
 const api_domain = "https://api.spoonacular.com/recipes";
 require('dotenv').config();
 
@@ -10,15 +11,17 @@ require('dotenv').config();
 
 async function getRecipeInformation(recipe_id) {
     try {
+      // check if the recipe is myRecipe
+      const recipeIdStr = String(recipe_id);
+      if (recipeIdStr.includes("MR")) { // unique identifier for a newly created recipe
+        return await getMyRecipeInformation(recipe_id); // fetch the recipe from the local DB
+      }
       const response = await axios.get(`${api_domain}/${recipe_id}/information`, {
         params: {
           includeNutrition: false,
-          // apiKey: process.env.SPOONACULAR_API_KEY || "b60349e37e994bfb83b9eb950173506e"
-          // apiKey: "759b5cca589c4f24af5d1423d1e6de1a"
           apiKey: process.env.SPOONACULAR_API_KEY
         }
       });
-      //console.log(`Received data for recipe ID ${recipe_id}:`, response.data);
       return response.data;
     } catch (error) {
       if (error.response && error.response.status === 404) {
@@ -51,7 +54,6 @@ async function getRecipeInformation(recipe_id) {
         glutenFree: glutenFree
     };
   }
-
 
 async function getRecipesDetails(recipe_ids) {
     try {
@@ -109,7 +111,6 @@ async function getRandomRecipes() {
 
 exports.getRecipesDetails = getRecipesDetails;
 exports.getRandomRecipes = getRandomRecipes;
-// exports.searchRecipe = searchRecipe;
 exports.getRecipeInformation = getRecipeInformation;
 exports.getMyRecipeInformation = getMyRecipeInformation;
 

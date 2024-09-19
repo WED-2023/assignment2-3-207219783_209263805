@@ -78,9 +78,9 @@ router.get("/random", async (req, res, next) => {
 router.get("/recipeId/:recipeId", async (req, res, next) => {
   try {
     const { recipeId } = req.params;
-    console.log("Fetching recipe with ID:", recipeId);
+    // console.log("Fetching recipe with ID:", recipeId);
 
-    const recipe = await recipes_utils.getRecipeInformation(req.params.recipeId);
+    const recipe = await recipes_utils.getRecipeInformation(recipeId);
     if (recipe) {
       res.status(200).send(recipe); // מחזיר את המתכון אם נמצא
     } else {

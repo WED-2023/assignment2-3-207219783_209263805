@@ -42,8 +42,9 @@ async function getRecipeInformation(recipe_id) {
     }
   
     // Rename the recipe_id to avoid conflicts
-    let { recipe_id: user_recipe_id, title, image, readyInMinutes, vegetarian, vegan, glutenFree } = user_recipe[0];
-  
+    let { recipe_id: user_recipe_id, title, image, readyInMinutes, vegetarian, vegan, glutenFree, instructions, servings } = user_recipe[0];
+    console.log("Instructions from DB:", instructions);
+
     return {
         id: user_recipe_id,  // Use the renamed variable
         title: title,
@@ -51,7 +52,9 @@ async function getRecipeInformation(recipe_id) {
         image: image,
         vegan: vegan,
         vegetarian: vegetarian,
-        glutenFree: glutenFree
+        glutenFree: glutenFree,
+        instructions: instructions,
+        servings: servings
     };
   }
 

@@ -164,7 +164,9 @@ router.post('/lastViewed', async (req,res,next) => {
   try {
     const user_id = req.body.user_id;
     const recipe_id = String(req.body.recipeId);
-    
+    if (recipe_id.includes("MR")) { 
+      return 
+    }    
     let last_viewed_recipes = await user_utils.getLastThreeViewedRecipes(user_id);
     
     if (!last_viewed_recipes.includes(recipe_id)) {

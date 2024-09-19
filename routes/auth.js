@@ -40,7 +40,6 @@ router.post("/Register", async (req, res, next) => {
   }
 });
 
-
 router.post("/Login", async (req, res, next) => {
   const { username, password } = req.body;
   try {
@@ -73,92 +72,6 @@ router.post("/Login", async (req, res, next) => {
   }
 });
 
-// router.post("/Login", async (req, res, next) => {
-//   console.log(req.sessionID);
-//   const {username, password} = req.body;
-//   // console.log(username);
-//   // console.log(password);
-//   if(username && password){
-//     if (req.session.authenticated){
-//       res.json(req.session);
-//     }
-//     // if the user not logged in
-//     else{
-//       if (password === '123'){
-//         req.session.authenticated = true;
-//         req.session.user = {
-//           username, password
-//         };
-//         res.json(req.session);
-//       }
-//       else{
-//         res.status(403).send({ message: "Bad Credentials", success: false });
-//       }
-//     }
-// }
-// else {
-//   res.status(403).send({ message: "Bad Credentials", success: false });
-
-// }
-
-//   // res.send(200);
-
-// });
-
-
-// router.post("/Login", async (req, res, next) => {
-//   try {
-//     // check that username exists
-//     const users = await DButils.execQuery("SELECT username FROM users");
-//     if (!users.find((x) => x.username === req.body.username))
-//       throw { status: 401, message: "Username or Password incorrect" };
-
-//     // check that the password is correct
-//     const user = (
-//       await DButils.execQuery(
-//         `SELECT * FROM users WHERE username = '${req.body.username}'`
-//       )
-//     )[0];
-
-//     if (!bcrypt.compareSync(req.body.password, user.password)) {
-//       throw { status: 401, message: "Username or Password incorrect" };
-//     }
-
-//     // Set cookie
-//     req.session.user_id = user.user_id;
-//     console.log('Session after login:', req.session); // Add debug log
-
-
-//     // return cookie
-//     res.status(200).send({ message: "login succeeded", success: true });
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-
-// router.post("/login", async (req, res, next) => {
-//   try {
-//     const users = await DButils.execQuery("SELECT * FROM users WHERE username = ?", [req.body.username]);
-//     if (users.length === 0) {
-//       throw { status: 401, message: "Username or Password incorrect" };
-//     }
-
-//     const user = users[0];
-
-//     if (!bcrypt.compareSync(req.body.password, user.password)) {
-//       throw { status: 401, message: "Username or Password incorrect" };
-//     }
-
-//     req.session.user_id = user.user_id;
-
-//     console.log('Session after login:', req.session);
-
-//     res.status(200).send({ message: "Login succeeded", success: true });
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-
 router.post("/Logout", (req, res) => {
   req.session.destroy(err => {
     if (err) {
@@ -170,19 +83,4 @@ router.post("/Logout", (req, res) => {
   });
 });
 
-// router.post("/Logout", function (req, res) {
-//   req.session.reset(); // reset the session info --> send cookie when  req.session == undefined!!
-//   res.send({ success: true, message: "logout succeeded" });
-// });
-
-// Route to destroy session (logout)
-// router.post('/logout', (req, res) => {
-//   req.session.destroy(err => {
-//     if (err) {
-//       return res.status(500).send('Could not log out.');
-//     } else {
-//       res.send('Logout successful');
-//     }
-//   });
-// });
 module.exports = router;

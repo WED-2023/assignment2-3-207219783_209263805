@@ -32,7 +32,7 @@ router.get("/", (req, res) => res.send("im here"));
 // Server-side endpoint to handle recipe search
 router.get("/search", async (req, res, next) => {
   const { query, number } = req.query;
-  const apiKey = process.env.SPOONACULAR_API_KEY || "b60349e37e994bfb83b9eb950173506e"; // Make sure your API key is stored in environment variables
+  const apiKey = process.env.SPOONACULAR_API_KEY
   const url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${apiKey}&query=${query}&number=${number}&addRecipeInformation=true`;
 
   try {
@@ -43,19 +43,6 @@ router.get("/search", async (req, res, next) => {
     res.status(500).send({ message: "Failed to fetch recipes" });
   }
 });
-
-
-// // Route to fetch random recipes
-// router.get('/random', async (req, res, next) => {
-//   try {
-//     const ap = "286e5a606e124fbe8cf4e627c135ab92";
-//     const amountToFetch = 3;
-//     const response = await axios.get(`https://api.spoonacular.com/recipes/random?number=${amountToFetch}&apiKey=${ap}`);
-//     res.status(200).send(response.data);
-//   } catch (error) {
-//     next(error);
-//   }
-// });
 
 // Route to fetch last viewed recipes
 router.get('/last-viewed', async (req, res, next) => {
@@ -70,28 +57,50 @@ router.get('/last-viewed', async (req, res, next) => {
     next(error);
   }
 });
+
 /**
  * This path returns random recipes
  */
 router.get("/random", async (req, res, next) => {
   try{
     const randomRecipes = await recipes_utils.getRandomRecipes();
-    console.log(randomRecipes);
-
+    // console.log(randomRecipes);
     res.status(200).send(randomRecipes);
   } catch (error) {
     console.error('Error fetching random recipes:', error);
     next(error);
   }
 });
+
 /**
  * This path returns a full details of a recipe by its id
  */
 router.get("/recipeId/:recipeId", async (req, res, next) => {
   try {
-    // const recipe = await recipes_utils.getRecipesDetails([req.params.recipeId]);
+    const { recipeId } = req.params;
+    console.log("Fetching recipe with ID:", recipeId);
+
     const recipe = await recipes_utils.getRecipeInformation(req.params.recipeId);
-    console.log(recipe);
+    if (recipe) {
+      res.status(200).send(recipe); // מחזיר את המתכון אם נמצא
+    } else {
+      res.status(404).send({ message: "Recipe not found" }); // מחזיר 404 אם המתכון לא נמצא
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/MyRecipe/:recipeId", async (req, res, next) => {
+  try {
+    const { recipeId } = req.params;
+    console.log("Fetching recipe with ID:", recipeId);  // Debugging log
+    
+    if (!recipeId || recipeId === 'undefined') {
+      return res.status(400).send({ message: "Invalid recipe ID: recipeId is undefined" });
+    }
+    const recipe = await recipes_utils.getMyRecipeInformation(req.params.recipeId);
+    // console.log(recipe);
     res.status(200).send(recipe);
   } catch (error) {
     next(error);

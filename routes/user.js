@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+const axios = require('axios');
 const DButils = require("./utils/DButils");
 const user_utils = require("./utils/user_utils");
 const recipe_utils = require("./utils/recipes_utils");
@@ -54,13 +55,18 @@ router.post('/favorites', async (req,res,next) => {
 router.delete('/favorites', async (req, res, next) => {
   try {
     const user_id = req.session.user.user_id;
-    const recipe_id = req.body.recipeId;
-
+    const recipe_id = req.query.recipeId;
+    console.log("User ID:", user_id); // Debugging - log user ID
+    console.log("Recipe ID:", recipe_id); // Debugging - log recipe ID
     // Check if the recipe exists in the user's favorites
     const favorites = await user_utils.getFavoriteRecipes(user_id);
-    const favoriteExists = favorites.some(fav => fav.recipe_id === recipe_id);
+    console.log("Favorites:", favorites); // Debugging - log the favorites retrieved
+
+    const favoriteExists = favorites.some(fav => fav.recipe_id == recipe_id);
 
     if (!favoriteExists) {
+      console.log("Recipe not found in favorites"); // Debugging - recipe not found
+
       return res.status(404).send("Recipe not found in favorites");
     }
 
@@ -81,10 +87,7 @@ router.delete('/favorites', async (req, res, next) => {
 router.get('/favorites', async (req,res,next) => {
   try{
     const user_id = req.session.user.user_id;
-    console.log(user_id);
-    // let favorite_recipes = {};
     const recipes_id = await user_utils.getFavoriteRecipes(user_id);
-    // console.log(recipes_id);
     if (recipes_id.length === 0) {
       return res.status(404).send({ message: "No favorite recipes found" });
     }
@@ -107,7 +110,6 @@ router.get('/favorites', async (req,res,next) => {
  * This path is for creating a new recipe 
  * Create a new Recipe
  */
-// TODO: Maybe do delete the Serving count !!!
 router.post("/myRecipes", async (req, res, next) => {
   try {
     const user_id = req.session.user.user_id;
@@ -124,7 +126,7 @@ router.post("/myRecipes", async (req, res, next) => {
     vegetarian = vegetarian ? 1 : 0;
     vegan = vegan ? 1 : 0;
     glutenFree = glutenFree ? 1 : 0;
-
+    // let query = `INSERT INTO recipes VALUES ('${user_id}','${title}','${image}','${readyInMinutes}','${vegetarian}','${vegan}', '${glutenFree}','${ingredientsJSON}','${instructions}','${servings}')`;
     let query = `INSERT INTO Recipes VALUES ('${user_id}','${recipe_id}','${title}','${image}','${readyInMinutes}','${vegetarian}','${vegan}', '${glutenFree}','${ingredientsJSON}','${instructions}','${servings}')`;
     await DButils.execQuery(query);
     res.status(201).send("A new recipe has been added");
@@ -150,13 +152,84 @@ router.get("/myRecipes", async (req, res, next) => {
     if (myRecipes.length === 0) {
       return res.status(404).send({ message: "No recipes found for this user" });
     }
-
+    // console.log(myRecipes)
     res.status(200).send(myRecipes);
   } catch (error) {
     console.error('Error fetching user recipes:', error);
     next(error);
   }
 });
+
+router.post('/lastViewed', async (req,res,next) => {
+  try {
+    const user_id = req.body.user_id;
+    const recipe_id = String(req.body.recipeId);
+    
+    let last_viewed_recipes = await user_utils.getLastThreeViewedRecipes(user_id);
+    
+    if (!last_viewed_recipes.includes(recipe_id)) {
+      last_viewed_recipes.push(recipe_id);
+
+      if (last_viewed_recipes.length > 3) {
+        last_viewed_recipes.shift();
+      }
+    }
+
+    await DButils.execQuery(
+      `UPDATE last_viewed_recipes SET is_recent=false WHERE user_id='${user_id}'`
+    );
+
+    for (let recipe_id of last_viewed_recipes) {
+      await user_utils.updateLastViewedRecipe(user_id, recipe_id, true);
+    }
+
+    await DButils.execQuery(`
+      INSERT INTO last_viewed_recipes (user_id, recipe_id, viewed_at)
+      VALUES ('${user_id}', '${recipe_id}', NOW()) 
+      ON DUPLICATE KEY UPDATE viewed_at=NOW()
+    `);
+
+    res.status(200).send({
+      message: "The recipe has been successfully saved as recently viewed",
+      status: 200,
+      success: true
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/lastViewed', async (req, res, next) => {
+  try {
+    const username = req.session.user ? req.session.user.username : null;
+    if (!username) {
+      return res.status(401).json({ message: 'User is not logged in', status: 401 });
+    }
+
+    const recipeIds = await user_utils.getLastThreeViewedRecipes(username);
+    if (!recipeIds || recipeIds.length === 0) {
+      return res.status(200).json({ message: 'No recipes viewed recently', status: 200 });
+    }
+
+    const recipePreviews = await Promise.all(recipeIds.map(async (recipeId) => {
+      try {
+        const response = await axios.get(`http://localhost:3000/recipes/recipeId/${recipeId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Failed to fetch recipe ${recipeId} from Spoonacular:`, error);
+        return null; 
+      }
+    }));
+
+    const validRecipes = recipePreviews.filter(recipe => recipe !== null);
+
+    res.status(200).json(validRecipes);
+  } catch (error) {
+    console.error('Error fetching last viewed recipes:', error);
+    next(error);
+  }
+});
+
 
 
 module.exports = router;

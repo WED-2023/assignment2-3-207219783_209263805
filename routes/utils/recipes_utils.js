@@ -8,13 +8,14 @@ require('dotenv').config();
  * @param {*} recipes_info 
  */
 
-
 async function getRecipeInformation(recipe_id) {
     try {
       const response = await axios.get(`${api_domain}/${recipe_id}/information`, {
         params: {
           includeNutrition: false,
-          apiKey: process.env.SPOONACULAR_API_KEY || "b60349e37e994bfb83b9eb950173506e"
+          // apiKey: process.env.SPOONACULAR_API_KEY || "b60349e37e994bfb83b9eb950173506e"
+          // apiKey: "759b5cca589c4f24af5d1423d1e6de1a"
+          apiKey: process.env.SPOONACULAR_API_KEY
         }
       });
       //console.log(`Received data for recipe ID ${recipe_id}:`, response.data);
@@ -29,6 +30,29 @@ async function getRecipeInformation(recipe_id) {
       }
     }
   }
+
+  async function getMyRecipeInformation(recipe_id) {
+    const user_recipe = await DButils.execQuery(`SELECT * FROM recipes WHERE recipe_id='${recipe_id}'`);
+  
+    if (user_recipe.length === 0) {
+        throw new Error("Recipe not found");
+    }
+  
+    // Rename the recipe_id to avoid conflicts
+    let { recipe_id: user_recipe_id, title, image, readyInMinutes, vegetarian, vegan, glutenFree } = user_recipe[0];
+  
+    return {
+        id: user_recipe_id,  // Use the renamed variable
+        title: title,
+        readyInMinutes: readyInMinutes,
+        image: image,
+        vegan: vegan,
+        vegetarian: vegetarian,
+        glutenFree: glutenFree
+    };
+  }
+
+
 async function getRecipesDetails(recipe_ids) {
     try {
       const recipeDetailsPromises = recipe_ids.map(id => getRecipeInformation(id));
@@ -56,11 +80,13 @@ async function getRandomRecipes() {
     const response = await axios.get(`${api_domain}/random`, {
       params: {
         number: 3,  // count of random recipes
-        apiKey: process.env.SPOONACULAR_API_KEY || "286e5a606e124fbe8cf4e627c135ab92"
+        // apiKey: process.env.SPOONACULAR_API_KEY || "286e5a606e124fbe8cf4e627c135ab92"
+        // apiKey: "759b5cca589c4f24af5d1423d1e6de1a"
+        apiKey: process.env.SPOONACULAR_API_KEY
       }
     });
     const recipes = response.data.recipes;
-    console.log(recipes);
+    // console.log(recipes);
     return recipes.map(recipe_info => {
       const { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree } = recipe_info;
       return {
@@ -80,33 +106,11 @@ async function getRandomRecipes() {
   }
 }
 
-async function searchRecipe(recipeName, cuisine, diet, intolerance, number) {
-  try{
-    const response = await axios.get(`${api_domain}/complexSearch`, {
-      params: {
-          query: recipeName,
-          cuisine: cuisine,
-          diet: diet,
-          intolerances: intolerance,
-          number: number,
-          apiKey: process.env.SPOONACULAR_API_KEY || "286e5a606e124fbe8cf4e627c135ab92"
-        }
-  });
-  console.log(AAAAAAAAAAAAAAAAAA);
-  const recipeIds = response.data.results.map(element => element.id);
-  console.log(`User ${username} searched for recipes with query: ${recipeName}`);
-  console.log(BBBBBBBBBB);
-  return getRecipesDetails(recipeIds);
-  } catch (error) {
-    throw error;
-  }
-  // return getRecipesPreview(response.data.results.map((element) => element.id), username);
-}
-
 
 exports.getRecipesDetails = getRecipesDetails;
 exports.getRandomRecipes = getRandomRecipes;
-exports.searchRecipe = searchRecipe;
+// exports.searchRecipe = searchRecipe;
 exports.getRecipeInformation = getRecipeInformation;
+exports.getMyRecipeInformation = getMyRecipeInformation;
 
 

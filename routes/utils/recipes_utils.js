@@ -43,10 +43,9 @@ async function getRecipeInformation(recipe_id) {
   
     // Rename the recipe_id to avoid conflicts
     let { recipe_id: user_recipe_id, title, image, readyInMinutes, vegetarian, vegan, glutenFree, instructions, servings } = user_recipe[0];
-    console.log("Instructions from DB:", instructions);
 
     return {
-        id: user_recipe_id,  // Use the renamed variable
+        id: user_recipe_id, 
         title: title,
         readyInMinutes: readyInMinutes,
         image: image,
@@ -84,14 +83,11 @@ async function getRandomRecipes() {
   try {
     const response = await axios.get(`${api_domain}/random`, {
       params: {
-        number: 3,  // count of random recipes
-        // apiKey: process.env.SPOONACULAR_API_KEY || "286e5a606e124fbe8cf4e627c135ab92"
-        // apiKey: "759b5cca589c4f24af5d1423d1e6de1a"
+        number: 3,  
         apiKey: process.env.SPOONACULAR_API_KEY
       }
     });
     const recipes = response.data.recipes;
-    // console.log(recipes);
     return recipes.map(recipe_info => {
       const { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree } = recipe_info;
       return {

@@ -63,8 +63,6 @@ router.post("/Login", async (req, res, next) => {
       username: user.username
     };
     
-    // console.log('Session after login:', req.session); // Add debug log
-
     // Return successful response
     res.status(200).send({ message: "login succeeded", success: true });
   } catch (error) {

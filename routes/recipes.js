@@ -64,7 +64,6 @@ router.get('/last-viewed', async (req, res, next) => {
 router.get("/random", async (req, res, next) => {
   try{
     const randomRecipes = await recipes_utils.getRandomRecipes();
-    // console.log(randomRecipes);
     res.status(200).send(randomRecipes);
   } catch (error) {
     console.error('Error fetching random recipes:', error);
@@ -78,13 +77,12 @@ router.get("/random", async (req, res, next) => {
 router.get("/recipeId/:recipeId", async (req, res, next) => {
   try {
     const { recipeId } = req.params;
-    // console.log("Fetching recipe with ID:", recipeId);
-
     const recipe = await recipes_utils.getRecipeInformation(recipeId);
+
     if (recipe) {
-      res.status(200).send(recipe); // מחזיר את המתכון אם נמצא
+      res.status(200).send(recipe); 
     } else {
-      res.status(404).send({ message: "Recipe not found" }); // מחזיר 404 אם המתכון לא נמצא
+      res.status(404).send({ message: "Recipe not found" });  
     }
   } catch (error) {
     next(error);

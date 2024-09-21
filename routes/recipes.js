@@ -2,40 +2,29 @@ var express = require("express");
 var router = express.Router();
 const recipes_utils = require("./utils/recipes_utils");
 require("dotenv").config();
+const axios = require('axios');
 
-const axios = require('axios'); 
-
+/**
+ * @route GET /
+ * @desc Basic route to test if the server is running.
+ * @access Public
+ */
 router.get("/", (req, res) => res.send("im here"));
 
 /**
- * This path is for searching a recipe
+ * @route GET /search
+ * @desc Search for recipes using query parameters.
+ * @param {string} query - The search keyword for recipes (e.g., "pasta").
+ * @param {number} [number=3] - The number of recipes to return (default is 3).
+ * @access Public
  */
-// router.get("/search", async (req, res, next) => {
-//   try {
-//     const recipeName = req.query.recipeName;
-//     const cuisine = req.query.cuisine;
-//     const diet = req.query.diet;
-//     const intolerance = req.query.intolerance;
-//     const number = req.query.number || 5;
-//     const results = await recipes_utils.searchRecipe(recipeName, cuisine, diet, intolerance, number);
-//     if (results.length === 0){
-//       throw { status: 404, message: "no results were found" };
-//     }
-//     else{
-//       res.status(200).send(results);
-//     }  
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-
-// Server-side endpoint to handle recipe search
 router.get("/search", async (req, res, next) => {
   const { query, number } = req.query;
-  const apiKey = process.env.SPOONACULAR_API_KEY
-  const url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${apiKey}&query=${query}&number=${number}&addRecipeInformation=true`;
+  const apiKey = process.env.SPOONACULAR_API_KEY;
+  const url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${apiKey}&query=${query}&number=${number || 3}&addRecipeInformation=true`;
 
   try {
+    // Fetch recipes from the Spoonacular API
     const response = await axios.get(url);
     res.status(200).send(response.data);
   } catch (error) {
@@ -44,25 +33,14 @@ router.get("/search", async (req, res, next) => {
   }
 });
 
-// Route to fetch last viewed recipes
-router.get('/last-viewed', async (req, res, next) => {
-  try {
-    const user_id = req.session.user_id;
-    if (!user_id) {
-      return res.status(401).send({ message: "Unauthorized", success: false });
-    }
-    const lastRecipes = await DButils.execQuery(`SELECT * FROM last_viewed_recipes WHERE user_id = '${user_id}' ORDER BY viewed_at DESC LIMIT 3`);
-    res.status(200).send(lastRecipes);
-  } catch (error) {
-    next(error);
-  }
-});
-
 /**
- * This path returns random recipes
+ * @route GET /random
+ * @desc Fetches random recipes from the database or external API.
+ * @access Public
  */
 router.get("/random", async (req, res, next) => {
-  try{
+  try {
+    // Get random recipes from recipes_utils
     const randomRecipes = await recipes_utils.getRandomRecipes();
     res.status(200).send(randomRecipes);
   } catch (error) {
@@ -72,20 +50,25 @@ router.get("/random", async (req, res, next) => {
 });
 
 /**
- * This path returns a full details of a recipe by its id
+ * @route GET /recipeId/:recipeId
+ * @desc Get full details of a recipe by its ID.
+ * @param {string} recipeId - The unique ID of the recipe.
+ * @access Public
  */
 router.get("/recipeId/:recipeId", async (req, res, next) => {
   try {
     const { recipeId } = req.params;
+
+    // Fetch detailed recipe information from recipes_utils
     const recipe = await recipes_utils.getRecipeInformation(recipeId);
 
     if (recipe) {
-      res.status(200).send(recipe); 
+      res.status(200).send(recipe); // Send recipe details if found
     } else {
-      res.status(404).send({ message: "Recipe not found" });  
+      res.status(404).send({ message: "Recipe not found" });
     }
   } catch (error) {
-    next(error);
+    next(error); // Forward the error to the error-handling middleware
   }
 });
 
